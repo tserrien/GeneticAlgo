@@ -34,45 +34,44 @@ public class Practical2 {
 		ChromosomeOperations CrO = new ChromosomeOperations();
 		Random generator = new Random(System.currentTimeMillis());
 		
-		if(mutationChanceReciprocal < 1){
-			mutationChanceReciprocal = rand.nextInt(500)+50;
-			System.out.println("Invalid mutation factor. Factor reset to: " + mutationChanceReciprocal);
-		}
-		
-		for (char c = 'A'; c <= 'Z'; c++) {
-			alphabet[c - 'A'] = c;
-		}
-		alphabet[26] =' ';
-		
 		for (int i = 0; i < popSize; i++){
 			population[i] = new Individual();
 		}
 		
+		if(mutationChanceReciprocal < 1){
+			mutationChanceReciprocal = rand.nextInt(500)+50;
+			System.out.println("Invalid mutation factor. Factor reset to: " + mutationChanceReciprocal);
+		}
+		/*
+		for (char c = 'A'; c <= 'Z'; c++) {
+			alphabet[c - 'A'] = c;
+		}
+		alphabet[26] =' ';
+		*/		
+		
 		// we initialize the population with random characters
-		for (int i = 0; i < popSize; i++){	/*
-			for (int j = 0; j < TARGET.length(); j++){
-				tempChromosome[j] = alphabet[generator.nextInt(alphabet.length)]; //choose a random letter in the alphabet
-			}
-			*/
+		for (int i = 0; i < popSize; i++){	
+			population[i] = population[i].setIndividual(TARGET.length());
+			
 			if(debug && popSize > 3){
 				if( i == popSize-2){
-					population[i].StringIndividual("HELLO ASDFG");
+					population[i] = population[i].StringIndividual("HELLO ASDFG");
 				}
 				if( i == popSize-1){
-					population[i].StringIndividual(TARGET);
-					//tempChromosome=new char[]{'H','E','L','L','O',' ','W','O','R','L','D'};
+					population[i] = population[i].StringIndividual(TARGET);
 				}
 			}
-			
-			population[i].setIndividual(TARGET.length());
-			//population[i] = new Individual(tempChromosome);
 		}
+		
+		/*if(debug)for (int i = 0; i < population.length; i++) {	//prints out pointers to see if they were actually created
+		System.out.println(population[i]);							//was useful when moved the creating methpd to class
+		}*/
 		
 		// What does your population look like?
 		
 		for (int i = 0; i < population.length; i++) {
 			population[i].setFitness(population[i].genoToPhenotype(), TARGET, debug);		//fitness: euchlidean distance
-			population[i].setFitness2(population[i].genoToPhenotype(), TARGET, debug);		//fitness2: % of match
+			population[i].setFitness2(population[i].genoToPhenotype(), TARGET, debug);		//fitness2: % of match compared to target
 			if(debug)System.out.println(population[i].genoToPhenotype() + " " + population[i].getFitness() + " " + population[i].getFitness2());
 		}
 		System.out.println("\n\n");
@@ -87,11 +86,16 @@ public class Practical2 {
 			if(debug)System.out.println(population[i].genoToPhenotype() + " " + population[i].getFitness() + " " + population[i].getFitness2());
 		}
 		
-		System.out.println("Goal: " + goal);
-		
-		System.out.println(CrO.Mutator(CrO.ChromosomeToBits(population[0]), mutationChanceReciprocal));
+		if(debug)System.out.println("Goal: " + goal);
 		
 		//crossover
+		/*
+		System.out.println( "\nParent 1:\n" + population[0].genoToPhenotype() + "\nParent 2:\n" + population[popSize-1].genoToPhenotype() + "\nOffspring:\n" + CrO.crossover(population[0].genoToPhenotype(), population[popSize-1].genoToPhenotype()) );
+		
+		System.out.println( "\nParent 1:\n" + population[0].genoToPhenotype() + "\nParent 2:\n" + population[popSize-1].genoToPhenotype() + "\nOffspring:\n" + CrO.ChromosomeToBits( population[0] ) + "\n" + CrO.ChromosomeToBits( population[popSize-1] ) + "\n" +
+		CrO.crossover( CrO.ChromosomeToBits( population[0] ), CrO.ChromosomeToBits( population[popSize-1]) ) );
+		*/
+		
 		for(int i = 0; i < population.length; i++){
 			
 		}

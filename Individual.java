@@ -16,11 +16,26 @@ public class Individual {
 		this.fitness = 0;
 	}
 	
+	public String genoToPhenotype() {					//original gTP
+		StringBuilder builder = new StringBuilder();
+		builder.append(chromosome);
+		return builder.toString();
+	}
+	
+	public Individual clone() {							//original Clone
+		char[] chromClone = new char[chromosome.length];
+		for(int i = 0; i < chromClone.length; i++) {
+			chromClone[i] = chromosome[i];
+		}
+		return new Individual(chromClone);
+	}
+	
 	public Individual setIndividual(int len){			//took it out for a cleaner code, mostly matches the original
 	
 		char[] tempChromosome = new char[len];
 		
-		Random generator = new Random(System.currentTimeMillis());
+		//Random generator = new Random(System.currentTimeMillis());
+		Random generator = new Random();				//the system time binded version caused uniform individuals for some weird reason
 		
 		for (char c = 'A'; c <= 'Z'; c++) {
 			alphabet[c - 'A'] = c;
@@ -30,7 +45,7 @@ public class Individual {
 		for (int j = 0; j < len; j++){
 			tempChromosome[j] = alphabet[generator.nextInt(alphabet.length)]; //choose a random letter in the alphabet
 		}
-		return (new Individual(tempChromosome));
+		return new Individual(tempChromosome);
 	}
 	
 	public Individual StringIndividual(String manual){
@@ -64,7 +79,7 @@ public class Individual {
 		this.fitness = fitness;
 	}
 	
-	public void setFitness2(String DNA, String target, boolean debug) {
+	public void setFitness2(String DNA, String target, boolean debug) {				//so far only a testing feature, though this seems to be more useful
 		boolean e;
 		
 		for(int i = 0; i<DNA.length(); i++){
@@ -77,20 +92,6 @@ public class Individual {
 		}
 		fitness2 = fitness2/(target.length());
 		this.fitness2 = fitness2;
-	}
-	
-	public String genoToPhenotype() {
-		StringBuilder builder = new StringBuilder();
-		builder.append(chromosome);
-		return builder.toString();
-	}
-	
-	public Individual clone() {
-		char[] chromClone = new char[chromosome.length];
-		for(int i = 0; i < chromClone.length; i++) {
-			chromClone[i] = chromosome[i];
-		}
-		return new Individual(chromClone);
 	}
 	
 	public char[] getChromosome() {
