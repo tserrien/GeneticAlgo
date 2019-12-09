@@ -1,8 +1,12 @@
-import java.util.*;
+import java.util.Random;
 
 public class ChromosomeOperations{
-	
-	public String ChromosomeToBits(Individual specimen){		//takes a specimen, and changes it's gene codes to bits
+	/**
+	 * Takes a specimen, and changes it's gene codes to bits
+	 * @param specimen
+	 * @return string of chromosome
+	 */
+	public static String ChromosomeToBits(Individual specimen){
 		String chromosome = specimen.genoToPhenotype();
 		String[] nucleotides = new String[chromosome.length()];			//array for the bits to be displayed
 		
@@ -20,8 +24,15 @@ public class ChromosomeOperations{
 		
 		return chromosome;
 	}
-	
-	public String Mutator(String chromosome, int reciprocal){
+
+	/**
+	 *
+	 * @param chromosome
+	 * @param reciprocal chance of mutation
+	 * @return
+	 */
+
+	public static String Mutator(String chromosome, int reciprocal){
 		Random rand = new Random();
 		StringBuilder mutant = new StringBuilder(chromosome.length());
 		//System.out.println("Unmodified:\n" + chromosome);
@@ -29,12 +40,12 @@ public class ChromosomeOperations{
 		for(int i = 0; i < chromosome.length(); i++){
 			int chance = rand.nextInt(reciprocal);
 			char current = chromosome.charAt(i);
-			char space = ' ';								//debugging lvl desperate... but works :D
+			char space = ' ';
 			mutant = mutant.append(chromosome.charAt(i));
-			if( (chance == 0) && (current != space) ){		//hate++ https://imgflip.com/i/2m8lhr
+			if( (chance == 0) && (current != space) ){
 				char modified;
-				if(current == '1'){							//forcecasting didn't work :(
-					modified = '0';							//ugly but works
+				if(current == '1'){
+					modified = '0';
 				}else{
 					modified = '1';
 				}				
@@ -44,20 +55,28 @@ public class ChromosomeOperations{
 		chromosome = mutant.toString();		
 		return chromosome;
 	}
+
+	/**
+	 * Method to create the genetic code for the offspring of two individuals
+	 *
+	 * @param parent1
+	 * @param parent2
+	 * @return offsring of two parent specimens. (String)
+	 */
 	
-	public String crossover(String parent1, String parent2){			//crossover method works both on bit, byte and char level
-		
-		int len = parent1.length();										//for convinience and more readable code
-		int strength;													//determines which parent's gene/nucleotid is stronger for the inheritance
-		String offspring = new String();												//chromosome coded in genes or nucleotids (depending on what was passed to the method)
+	public static String crossover(String parent1, String parent2){			//crossover method works both on bit, byte and char level
+		//TODO full revision, this is a mess
+		int len = parent1.length();
+		int strength;
+		String offspring = new String();	//chromosome coded in genes or nucleotids (depending on what was passed to the method)
 		
 		Random rand = new Random();
 		StringBuilder offspringChromosome = new StringBuilder( len );
 		
 		for( int i = 0; i < len; i++){
 			strength = rand.nextInt(len);
-			if(strength > (len/2) ){									//if the random based on the chromosomelenght of the parents is higher than the half, first parent passes down genes
-				offspringChromosome.append(parent1.charAt(i));			//needs manual recoding to give priority to a parent, may do it later for fun
+			if(strength > (len/2) ){
+				offspringChromosome.append(parent1.charAt(i));
 			}else{
 				offspringChromosome.append(parent2.charAt(i));
 			}
@@ -66,14 +85,22 @@ public class ChromosomeOperations{
 		offspring = offspringChromosome.toString();
 		
 		return offspring;
-		//returns string, as it can easily be processed by mutator method
 	}
-	
-	/*
+
 	public static Individual BitsToChromosome(String chromosome){
-		Induvidual specimen = new Individual();
+		Individual specimen = new Individual();
 		
 		return specimen;	
 	}
+
+	public void ChromosomeToBitsSomething(Individual specimen){ //messy code, function unclear atm
+		String gene = specimen.genoToPhenotype();
+		String[] bits = new String[gene.length()];
+	/*
+	byte tested = (byte) Integer.parseInt(args[0]);
+	String s1 = String.format("%8s", Integer.toBinaryString(tested & 0xFF)).replace(' ', '0');
+	System.out.println(s1);
+	}
 	*/
+	}
 }

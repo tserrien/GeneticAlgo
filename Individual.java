@@ -1,8 +1,9 @@
-import java.util.*;
+import java.util.Random;
 
 public class Individual {
 	
 	private char[] alphabet = new char[27];
+	private int generation;
 	char[] chromosome;
 	double fitness;
 	double fitness2;
@@ -34,7 +35,6 @@ public class Individual {
 	
 		char[] tempChromosome = new char[len];
 		
-		//Random generator = new Random(System.currentTimeMillis());
 		Random generator = new Random();				//the system time binded version caused uniform individuals for some weird reason
 		
 		for (char c = 'A'; c <= 'Z'; c++) {
@@ -78,8 +78,9 @@ public class Individual {
 		fitness = 1 - fitness/(target.length()*maxDistance);
 		this.fitness = fitness;
 	}
-	
-	public void setFitness2(String DNA, String target, boolean debug) {				//so far only a testing feature, though this seems to be more useful
+
+	//so far only a testing feature, though this seems to be more useful
+	public void setFitness2(String DNA, String target, boolean debug) {
 		boolean e;
 		
 		for(int i = 0; i<DNA.length(); i++){
@@ -108,5 +109,13 @@ public class Individual {
 	
 	public double getFitness2() {
 		return fitness2;
+	}
+
+	public void setGeneration(int generation){
+		this.generation = generation;
+	}
+
+	public int getGeneration(){
+		return generation;
 	}
 }

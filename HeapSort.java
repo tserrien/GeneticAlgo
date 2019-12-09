@@ -1,6 +1,4 @@
-//annoying copyright stuff moved to bottom
-public class HeapSort 
-{    
+public class HeapSort{
     public static void sort(Individual i[]){
         int N = i.length;
         
