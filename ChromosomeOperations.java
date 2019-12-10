@@ -1,79 +1,67 @@
 import java.util.Random;
 
 public class ChromosomeOperations{
-	/**
-	 * Takes a specimen, and changes it's gene codes to bits
-	 * @param specimen
-	 * @return string of chromosome
-	 */
-	public static String ChromosomeToBits(Individual specimen){
-		String chromosome = specimen.genoToPhenotype();
-		String[] nucleotides = new String[chromosome.length()];			//array for the bits to be displayed
-		
-		for(int i = 0; i < chromosome.length(); i++){				//can't describe how much i hate java now
-			//following line is courtesy of https://stackoverflow.com/a/12310078 modified to fit
-			nucleotides[i] = String.format("%8s", Integer.toBinaryString(chromosome.charAt(i) & 0xFF)).replace(' ', '0');
-			//System.out.println(chromosome.charAt(i) + " " + (byte)chromosome.charAt(i) + " " + bits[i]);
-		}
-		
-		StringBuilder sb = new StringBuilder(chromosome.length()*9); //8 bits, +1 space
-		
-		for(int i = 0; i < nucleotides.length; i++){
-			chromosome = sb.append(nucleotides[i] + " ").toString();
-		}
-		
-		return chromosome;
-	}
-
-	/**
+	/** Mutation method with full chromosome to nucleotid, nucleotid to chromosome rebuilding.
 	 *
-	 * @param chromosome
-	 * @param reciprocal chance of mutation
-	 * @return
+	 * @param specimen to perform mutation check on
+	 * @return mutated specimen
 	 */
-
-	public static String Mutator(String chromosome, int reciprocal){
+	public static Individual mutation(Individual specimen){
+		String chromosomeBits = chromosomeToBits(specimen);
+		boolean mutated = false;
 		Random rand = new Random();
-		StringBuilder mutant = new StringBuilder(chromosome.length());
-		//System.out.println("Unmodified:\n" + chromosome);
+		StringBuilder mutant = new StringBuilder(chromosomeBits.length());
+
+		if(Config.debug)System.out.println("Unmodified: " + specimen.genoToPhenotype());
 		
-		for(int i = 0; i < chromosome.length(); i++){
-			int chance = rand.nextInt(reciprocal);
-			char current = chromosome.charAt(i);
-			char space = ' ';
-			mutant = mutant.append(chromosome.charAt(i));
-			if( (chance == 0) && (current != space) ){
-				char modified;
+		for(int i = 0; i < chromosomeBits.length(); i++){
+			int chance = rand.nextInt(Config.mutationChance);
+			char current = chromosomeBits.charAt(i);
+
+			mutant = mutant.append(current);
+
+			if (chance == 0){ //&& (current != space) ){
+				mutated = true;
 				if(current == '1'){
-					modified = '0';
+					mutant.setCharAt(i, '0');
 				}else{
-					modified = '1';
-				}				
-				mutant.setCharAt(i, modified);
+					mutant.setCharAt(i, '1');
+				}
 			}
-		}		
-		chromosome = mutant.toString();		
-		return chromosome;
+		}
+		chromosomeBits = mutant.toString();
+		if(Config.debug && mutated)System.out.println("Mutated: " + chromosomeBits);
+		specimen = bitsToChromosome(chromosomeBits);
+		return specimen;
 	}
 
 	/**
-	 * Method to create the genetic code for the offspring of two individuals
+	 * Uniform crossover method for two parent setup. Yields in a great amount of "stillborn" or invalid offsprings in
+	 * bit level crossover, the "nucleotid" level gives valid offsring only. The algorithm was selected based on this paper is flagged under.
+	 * Choice further explained in accompanying report.
 	 *
-	 * @param parent1
-	 * @param parent2
-	 * @return offsring of two parent specimens. (String)
+	 *
+	 * @param parent1 Individual type
+	 * @param parent2 Individual type
+	 * @return offspring, Individual type
+	 *
+	 * @see <a href="https://www.researchgate.net/publication/288749263_CROSSOVER_OPERATORS_IN_GENETIC_ALGORITHMS_A_REVIEW">Source</a>
 	 */
 	
-	public static String crossover(String parent1, String parent2){			//crossover method works both on bit, byte and char level
-		//TODO full revision, this is a mess
+	public static Individual uniformCrossover(Individual Parent1, Individual Parent2){
+		String parent1 = Parent1.genoToPhenotype();
+		String parent2 = Parent2.genoToPhenotype();
+
 		int len = parent1.length();
 		int strength;
-		String offspring = new String();	//chromosome coded in genes or nucleotids (depending on what was passed to the method)
+
+		Individual offspring = new Individual();
 		
 		Random rand = new Random();
 		StringBuilder offspringChromosome = new StringBuilder( len );
 		
 		for( int i = 0; i < len; i++){
+			//could have been a simple coin toss as well as this is just an overcomplicated 50/50 decision
 			strength = rand.nextInt(len);
 			if(strength > (len/2) ){
 				offspringChromosome.append(parent1.charAt(i));
@@ -81,26 +69,96 @@ public class ChromosomeOperations{
 				offspringChromosome.append(parent2.charAt(i));
 			}
 		}
-		
-		offspring = offspringChromosome.toString();
-		
+
+		offspring = mutation(offspring.stringIndividual(offspringChromosome.toString()));
+		return (offspring);
+	}
+
+	/** Average crossover method. Was added to compare runtime to uniform crossover.
+	 *
+	 *
+	 * @param parent1 Individual type
+	 * @param parent2 Individual type
+	 * @return Individual offspring
+	 *
+	 * @see <a href="https://www.researchgate.net/publication/288749263_CROSSOVER_OPERATORS_IN_GENETIC_ALGORITHMS_A_REVIEW">Source</a>
+	 */
+	public static Individual averageCrossover(Individual parent1, Individual parent2){
+		Individual offspring = new Individual();
+
+		byte[] averageOfParents = new byte[parent1.genoToPhenotype().length()];
+		byte[] parent1Byte = parent1.genoToPhenotype().getBytes();
+		byte[] parent2Byte = parent2.genoToPhenotype().getBytes();
+
+		for(int i = 0; i < averageOfParents.length; i++){
+			averageOfParents[i] = (byte) Math.round( (parent1Byte[i]+parent2Byte[i])/2	);
+		}
+		if(Config.debug)System.out.println(new String(averageOfParents));
+		offspring = mutation(offspring.stringIndividual(new String(averageOfParents)));
+
 		return offspring;
 	}
 
-	public static Individual BitsToChromosome(String chromosome){
-		Individual specimen = new Individual();
-		
-		return specimen;	
+	/**
+	 * Takes a specimen, and changes it's gene codes to bits
+	 * @param specimen
+	 * @return string of chromosome
+	 */
+	private static String chromosomeToBits(Individual specimen){
+		String chromosome = specimen.genoToPhenotype();
+		String[] nucleotides = new String[chromosome.length()];			//array for the bits to be displayed
+
+		for(int i = 0; i < chromosome.length(); i++){
+			//following line is courtesy of https://stackoverflow.com/a/12310078 modified to fit
+			nucleotides[i] = String.format("%8s", Integer.toBinaryString(chromosome.charAt(i) & 0xFF)).replace(' ', '0');
+		}
+
+		StringBuilder sb = new StringBuilder(chromosome.length()*8); //8 bits
+
+		for(int i = 0; i < nucleotides.length; i++){
+			chromosome = sb.append(nucleotides[i]).toString();
+		}
+
+		return chromosome;
 	}
 
-	public void ChromosomeToBitsSomething(Individual specimen){ //messy code, function unclear atm
-		String gene = specimen.genoToPhenotype();
-		String[] bits = new String[gene.length()];
-	/*
-	byte tested = (byte) Integer.parseInt(args[0]);
-	String s1 = String.format("%8s", Integer.toBinaryString(tested & 0xFF)).replace(' ', '0');
-	System.out.println(s1);
-	}
-	*/
+	/**
+	 * Method to rebuild the chromosome from nucleotids given in bit representation
+	 * @param chromosome string of bits
+	 * @return chromosome of individual
+	 */
+	private static Individual bitsToChromosome(String chromosome){
+		byte[] bitToByte = new byte[(int)(chromosome.length()/8)];
+		boolean valid = true;
+
+		Individual specimen = new Individual();
+
+		for(int i = 0; i < chromosome.length(); i+=8) {
+			StringBuilder sb = new StringBuilder(8); //to store only one byte in bit representation
+			int step = (int) (i / 8);
+
+			for (int j = 0; j < 8; j++) {
+				sb.append(chromosome.charAt(i + j));
+				//there must be a less hassle-free solution for this, but i'm not comfortable with bit operations
+				if (j != 0) bitToByte[step] += (byte)(Character.getNumericValue(chromosome.charAt(i + j )) * (int)Math.pow(2 , 8 - ( j + 1)));
+			}
+
+			if(!((bitToByte[step] >= 65 && bitToByte[step] <= 90) || bitToByte[step] == 32)){
+				valid = false;
+				break;
+			}
+		}
+
+		if(Config.debug)System.out.println(new String(bitToByte));
+
+		if(valid){
+			specimen = specimen.stringIndividual(new String(bitToByte));
+		}else{
+			specimen = specimen.stringIndividual("Fatal mutation");
+		}
+
+		specimen.setAlive(valid);
+
+		return specimen;	
 	}
 }

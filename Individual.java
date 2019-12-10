@@ -3,7 +3,11 @@ import java.util.Random;
 public class Individual {
 	
 	private char[] alphabet = new char[27];
-	private int generation;
+	private int generation = 0;
+	private String parent1 = "";
+	private String parent2 = "";
+	private boolean isAlive = true;
+
 	char[] chromosome;
 	double fitness;
 	double fitness2;
@@ -22,15 +26,7 @@ public class Individual {
 		builder.append(chromosome);
 		return builder.toString();
 	}
-	
-	public Individual clone() {							//original Clone
-		char[] chromClone = new char[chromosome.length];
-		for(int i = 0; i < chromClone.length; i++) {
-			chromClone[i] = chromosome[i];
-		}
-		return new Individual(chromClone);
-	}
-	
+
 	public Individual setIndividual(int len){			//took it out for a cleaner code, mostly matches the original
 	
 		char[] tempChromosome = new char[len];
@@ -48,50 +44,50 @@ public class Individual {
 		return new Individual(tempChromosome);
 	}
 	
-	public Individual StringIndividual(String manual){
+	public Individual stringIndividual(String manual){
 		char[] painrelief = new char[manual.length()];
 		for(int i = 0; i < manual.length(); i++){
 			painrelief[i] = manual.charAt(i);
 		}
-		return (new Individual(painrelief));
+		return new Individual(painrelief);
 	}
 	
-	public void setFitness(String DNA, String target, boolean debug) {
-		
+	public void setFitness(Individual specimen) {
+		String DNA = specimen.genoToPhenotype();
 		for(int i = 0; i<DNA.length(); i++){
 			byte a, b, space;
 			a = (byte)DNA.charAt(i);
-			b = (byte)target.charAt(i);
+			b = (byte)Config.TARGET.charAt(i);
 			space = (byte)' ';
 			if( (b!=' ' && a!=' ') || (a==' ' && b==' ')){
-			//if(debug)System.out.println(DNA.charAt(i) + " " + a + " " + target.charAt(i) + " " + b);
+			//if(Config.debug)System.out.println(DNA.charAt(i) + " " + a + " " + target.charAt(i) + " " + b);
 			int distance = Math.abs(a - b);
-			//if(debug)System.out.println(distance);
+			//if(Config.debug)System.out.println(distance);
 			fitness += distance;
 			}else{
-			//if(debug)System.out.println(DNA.charAt(i) + " " + a + " " + target.charAt(i) + " " + b);
+			//if(Config.debug)System.out.println(DNA.charAt(i) + " " + a + " " + Config.TARGET.charAt(i) + " " + b);
 			int distance = Math.abs(a - b) - space;
-			//if(debug)System.out.println(distance);
+			//if(Config.debug)System.out.println(distance);
 			fitness += distance;	
 			}
 		}
-		fitness = 1 - fitness/(target.length()*maxDistance);
+		fitness = 1 - fitness/(Config.TARGET.length()*maxDistance);
 		this.fitness = fitness;
 	}
 
-	//so far only a testing feature, though this seems to be more useful
-	public void setFitness2(String DNA, String target, boolean debug) {
-		boolean e;
+	public void setFitness2(Individual specimen) {
+		String DNA = specimen.genoToPhenotype();
+		boolean equals;
 		
 		for(int i = 0; i<DNA.length(); i++){
 			byte a, b;
 			a = (byte)DNA.charAt(i);
-			b = (byte)target.charAt(i);
-			e = a==b;
-			//if(debug)System.out.println(DNA.charAt(i) + " " + e + " " + target.charAt(i));
-			if(e) fitness2++;
+			b = (byte)Config.TARGET.charAt(i);
+			equals = a==b;
+			//if(Config.debug)System.out.println(DNA.charAt(i) + " " + equals + " " + Config.TARGET.charAt(i));
+			if(equals) fitness2++;
 		}
-		fitness2 = fitness2/(target.length());
+		fitness2 = fitness2/(Config.TARGET.length());
 		this.fitness2 = fitness2;
 	}
 	
@@ -118,4 +114,28 @@ public class Individual {
 	public int getGeneration(){
 		return generation;
 	}
+
+	public void setParent1(Individual parent1){
+		this.parent1 = parent1.genoToPhenotype();
+	}
+
+	public void setParent2(Individual parent2){
+		this.parent1 = parent2.genoToPhenotype();
+	}
+
+	public String getParent1(){
+		return parent1;
+	}
+
+	public String getParent2(){
+		return parent2;
+	}
+
+	public boolean getAlive(){
+	    return isAlive;
+    }
+
+    public void setAlive(boolean alive){
+	    this.isAlive = alive;
+    }
 }
