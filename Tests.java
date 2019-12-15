@@ -10,7 +10,7 @@ public class Tests{
 
         Config.setDebug(true);
 
-        int popSize = 500;
+        int popSize = 100;
 
         try{
             popSize = Integer.parseInt(args[0]);

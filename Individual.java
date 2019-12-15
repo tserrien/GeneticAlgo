@@ -12,22 +12,27 @@ public class Individual {
 	double fitness;
 	double fitness2;
 	int maxDistance = 25;
-	
-	public Individual(){								//empty constructor
+
+	//empty constructor
+	public Individual(){
 	}
-	
-	public Individual(char[] chromosome) {				//original constructor
+
+	//original constructor
+	public Individual(char[] chromosome) {
 		this.chromosome = chromosome;
 		this.fitness = 0;
 	}
-	
-	public String genoToPhenotype() {					//original gTP
+
+	//Original gTPt. Technically a toString method.
+	//Decided not to rename, as I plan to create a different toString
+	public String genoToPhenotype() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(chromosome);
 		return builder.toString();
 	}
 
-	public Individual setIndividual(int len){			//took it out for a cleaner code, mostly matches the original
+	//Mostly matches original
+	public Individual setIndividual(int len){
 	
 		char[] tempChromosome = new char[len];
 		
@@ -51,7 +56,8 @@ public class Individual {
 		}
 		return new Individual(painrelief);
 	}
-	
+
+	//TODO refactor to be argumentless
 	public void setFitness(Individual specimen) {
 		String DNA = specimen.genoToPhenotype();
 		for(int i = 0; i<DNA.length(); i++){
@@ -90,6 +96,20 @@ public class Individual {
 		fitness2 = fitness2/(Config.TARGET.length());
 		this.fitness2 = fitness2;
 	}
+
+	public static String toString(Individual specimen){
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(specimen.genoToPhenotype());
+		sb.append(", Generation: ");
+		sb.append(specimen.generation);
+		sb.append(", Parent1: ");
+		sb.append(specimen.parent1);
+		sb.append(", Parent2: ");
+		sb.append(specimen.parent2);
+
+		return sb.toString();
+	}
 	
 	public char[] getChromosome() {
 		return chromosome;
@@ -115,12 +135,9 @@ public class Individual {
 		return generation;
 	}
 
-	public void setParent1(Individual parent1){
+	public void setParents(Individual parent1, Individual parent2){
 		this.parent1 = parent1.genoToPhenotype();
-	}
-
-	public void setParent2(Individual parent2){
-		this.parent1 = parent2.genoToPhenotype();
+		this.parent2 = parent2.genoToPhenotype();
 	}
 
 	public String getParent1(){

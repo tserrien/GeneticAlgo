@@ -25,7 +25,7 @@ public class Main {
 	public static void main(String[] args) {
 
 	    boolean success = false;
-		int popSize = 500;
+		int popSize = 20;
 		double goal = 0;
 		char[] tempChromosome = new char[Config.TARGET.length()];
 		
@@ -40,7 +40,7 @@ public class Main {
 		Random rand = new Random();
 
 		Individual[] population = new Individual[popSize];
-		ChromosomeOperations CrO = new ChromosomeOperations();**
+		ChromosomeOperations CrO = new ChromosomeOperations();
 		Random generator = new Random(System.currentTimeMillis());
 		
 		for (int i = 0; i < popSize; i++){
@@ -56,14 +56,15 @@ public class Main {
 			System.out.println("Invalid mutation factor. Factor reset to: " + Config.mutationChance);
 		}
 
-		//sorting
 		HeapSort.sort(population);
 		
 		for(int i = 0; i < population.length; i++){
 			if(Config.debug)System.out.println(population[i].genoToPhenotype() + " " + population[i].getFitness() + " " + population[i].getFitness2());
 		}
 
-		//crossover
+		Individual[] newPopulation = Selection.elitistSelection(population, 0);
+		HeapSort.sort(newPopulation);
 
+		System.out.println(Individual.toString(newPopulation[0]));
 	}
 }
