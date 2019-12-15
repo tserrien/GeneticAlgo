@@ -24,10 +24,9 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 
+	    boolean success = false;
 		int popSize = 500;
-		
-		double goal = 0;		
-		
+		double goal = 0;
 		char[] tempChromosome = new char[Config.TARGET.length()];
 		
 		try{
@@ -41,11 +40,15 @@ public class Main {
 		Random rand = new Random();
 
 		Individual[] population = new Individual[popSize];
-		ChromosomeOperations CrO = new ChromosomeOperations();
+		ChromosomeOperations CrO = new ChromosomeOperations();**
 		Random generator = new Random(System.currentTimeMillis());
 		
 		for (int i = 0; i < popSize; i++){
 			population[i] = new Individual();
+            population[i] = population[i].setIndividual(Config.TARGET.length());
+            population[i].setFitness(population[i]);		//fitness: euchlidean distance
+            //population[i].setFitness2(population[i]);		//fitness2: % of match compared to target
+            if(Config.debug)System.out.println(population[i].genoToPhenotype() + " f1: " + population[i].getFitness() + " f2: " + population[i].getFitness2());
 		}
 		
 		if(Config.mutationChance < 1){
@@ -53,34 +56,10 @@ public class Main {
 			System.out.println("Invalid mutation factor. Factor reset to: " + Config.mutationChance);
 		}
 
-		// we initialize the population with random characters
-		for (int i = 0; i < popSize; i++){	
-			population[i] = population[i].setIndividual(Config.TARGET.length());
-			
-			if(Config.debug && popSize > 3){
-				if( i == popSize-2){
-					population[i] = population[i].stringIndividual("HELLO ASDFG");
-				}
-				if( i == popSize-1){
-					population[i] = population[i].stringIndividual(Config.TARGET);
-				}
-			}
-		}
-		
-		for (int i = 0; i < population.length; i++) {
-			population[i].setFitness(population[i]);		//fitness: euchlidean distance
-			population[i].setFitness2(population[i]);		//fitness2: % of match compared to target
-			if(Config.debug)System.out.println(population[i].genoToPhenotype() + " f1: " + population[i].getFitness() + " f2: " + population[i].getFitness2());
-		}
-		
 		//sorting
 		HeapSort.sort(population);
-		goal = population.length * 0.7; //only top 30% is selected for reproduction. elitist approach
-
-		if(Config.debug)System.out.println("Goal: " + goal);
 		
 		for(int i = 0; i < population.length; i++){
-			//if(population[i].getFitness() > goal || population[i].getFitness2() > 0) potent++;  //faulty line
 			if(Config.debug)System.out.println(population[i].genoToPhenotype() + " " + population[i].getFitness() + " " + population[i].getFitness2());
 		}
 
