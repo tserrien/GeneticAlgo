@@ -71,6 +71,14 @@ public class Main {
 		usedMem = (int)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() )/1024/1024;
 		System.out.println(Individual.toString(newPopulation[0]));
 		end = System.nanoTime();
-		System.out.println("Runtime: " + (int)((end - start )/1000000) + " ms\nMemory usage approximation: " + usedMem + "MB");
+		long runtime = end - start;
+		String time = "ms";
+		runtime = (long) (runtime / 10000000);
+		if(runtime > 1000){
+			runtime = (long)(runtime / 1000);
+			time = "s";
+		}
+		System.out.println("Runtime: " + runtime + " " + time);
+		System.out.println("Memory usage approximation: " + usedMem + "MB");
 	}
 }
