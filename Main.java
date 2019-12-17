@@ -24,7 +24,7 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		long start = System.nanoTime();
-		long end;
+		long end = 0;
 		long totalMem = Runtime.getRuntime().totalMemory();
 		long usedMem = 0;
 

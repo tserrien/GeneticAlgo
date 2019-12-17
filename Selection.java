@@ -3,7 +3,7 @@ public class Selection{
     public static Individual[] elitistSelection(Individual[] previousGeneration, int generationCount) {
 
         HeapSort.sort(previousGeneration);
-        if(Config.debug)
+        //if(Config.debug)
             System.out.println(Individual.toString(previousGeneration[0]) + ", Gen: " + generationCount + ", members: " + previousGeneration.length);
         //base case of recursion. may be moved elsewhere
         if (previousGeneration[0].getFitness() == 1) return previousGeneration;
@@ -153,10 +153,11 @@ public class Selection{
         previousGeneration = null;
         notNullOld = null;
 
-        //System.gc();
-        //System.gc();
-        if(generationCount % 5 == 0) Config.setElitePercent(Config.elitePercent / 2);
-
+        //every 3 generations garbage collection is forced
+        if(generationCount > 1 && generationCount % 3 == 0) {
+            System.gc();
+            System.gc();
+        }
         return elitistSelection(currentGeneration, (generationCount + 1));
     }
 }
