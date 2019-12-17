@@ -1,10 +1,13 @@
 public class Selection{
 
     public static Individual[] elitistSelection(Individual[] previousGeneration, int generationCount) {
+        long start = System.nanoTime();
+        long end = 0;
 
         HeapSort.sort(previousGeneration);
         //if(Config.debug)
             System.out.println(Individual.toString(previousGeneration[0]) + ", Gen: " + generationCount + ", members: " + previousGeneration.length);
+
         //base case of recursion. may be moved elsewhere
         if (previousGeneration[0].getFitness() == 1) return previousGeneration;
 
@@ -12,17 +15,19 @@ public class Selection{
         double minFitness = previousGeneration[0].getFitness() * (1 - Config.elitePercent);
 
         int breederCount = 0;
+        //TODO merge loops
         for(int i = 0; i < previousGeneration.length; i++) {
             //System.out.println(previousGeneration[i].chromo);
-            if(previousGeneration[i].getFitness() > minFitness){
+            if( previousGeneration[i].getFitness() > minFitness){
                 for (int j = i + 1; j < previousGeneration.length; j++) {
                     //eliminate duplicates, keep first entry
-                    if (previousGeneration[j] != null && previousGeneration[j].getFitness() > minFitness &&
-                            previousGeneration[i].chromo.compareTo(
-                                    previousGeneration[j].chromo) == 0) {
-                        previousGeneration[j].setAlive(false);
-                    }
-                }
+                    if (previousGeneration[j] != null && previousGeneration[j].getFitness() > minFitness && previousGeneration[i].chromo.compareTo(previousGeneration[j].chromo) == 0) previousGeneration[j].setAlive(false);
+                }/*
+                if (previousGeneration[i].getAlive() && (generationCount - previousGeneration[i].getGeneration()) < Config.lifeTime){
+                    breederCount++;
+                }else{
+                    previousGeneration[i].setAlive(false);
+                }*/
             }
         }
 
@@ -34,6 +39,8 @@ public class Selection{
                 previousGeneration[i].setAlive(false);
             }
         }
+        //*/
+
         if(breederCount < 2 ) {
             breederCount = 2;
             for (int i = breederCount; i < previousGeneration.length; i++) previousGeneration[i] = null;
@@ -155,9 +162,21 @@ public class Selection{
 
         //every 3 generations garbage collection is forced
         if(generationCount > 1 && generationCount % 3 == 0) {
+            System.out.println("Buckle up, GC time!");
             System.gc();
             System.gc();
+            //Config.setElitePercent(Config.elitePercent / 2); //really don't want to do this :(
         }
+
+        end = System.nanoTime();
+        long runtime = end - start;
+        String time = "ms";
+        runtime = (long) (runtime / 1000000);
+        if(runtime > 1000){
+            runtime = (long)(runtime / 1000);
+            time = "s";
+        }
+        System.out.println("Runtime: " + runtime + " " + time);
         return elitistSelection(currentGeneration, (generationCount + 1));
     }
 }
