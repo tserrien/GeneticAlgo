@@ -31,26 +31,26 @@ public class Tests{
         test1 = test1.stringIndividual(Config.TARGET);
         test2 = test2.stringIndividual("ALIVEINDEED");
 
-        offspring = CrO.uniformCrossover(test1, test2);
-        System.out.println("Uniform crossover offspring: " + offspring.genoToPhenotype() + " " + offspring.getAlive());
+        offspring = CrO.uniformCrossover(test1.chromo, test2.chromo);
+        System.out.println("Uniform crossover offspring: " + offspring.chromo + " " + offspring.getAlive());
 
-        offspring = CrO.averageCrossover(test1, test2);
-        System.out.println("Average crossover offspring: " + offspring.genoToPhenotype() + " " + offspring.getAlive());
+        offspring = CrO.averageCrossover(test1.chromo, test2.chromo);
+        System.out.println("Average crossover offspring: " + offspring.chromo + " " + offspring.getAlive());
 
         test1 = test1.setIndividual(Config.TARGET.length());
         test2 = test2.setIndividual(Config.TARGET.length());
 
-        offspring = CrO.uniformCrossover(test1, test2);
-        System.out.println("Uniform crossover offspring: " + offspring.genoToPhenotype() + " " + offspring.getAlive());
+        offspring = CrO.uniformCrossover(test1.chromo, test2.chromo);
+        System.out.println("Uniform crossover offspring: " + offspring.chromo + " " + offspring.getAlive());
 
-        offspring = CrO.averageCrossover(test1, test2);
-        System.out.println("Average crossover offspring: " + offspring.genoToPhenotype() + " " + offspring.getAlive());
+        offspring = CrO.averageCrossover(test1.chromo, test2.chromo);
+        System.out.println("Average crossover offspring: " + offspring.chromo + " " + offspring.getAlive());
 
         Individual test = new Individual();
         test = test.stringIndividual(Config.TARGET);
         for(int i = 0; i < 15; i++) {
            test = CrO.mutation(test);
-           System.out.println(i + " " +test.genoToPhenotype() + " " + test.getAlive());
+           System.out.println(i + " " +test.chromo + " " + test.getAlive());
         }
     }
 }

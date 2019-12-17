@@ -7,20 +7,20 @@ public class ChromosomeOperations{
 	 * @return mutated specimen
 	 */
 	public static Individual mutation(Individual specimen){
-		String chromosomeBits = chromosomeToBits(specimen);
+		String chromosomeBits = chromosomeToBits(specimen.chromo);
 		boolean mutated = false;
 		Random rand = new Random();
 		StringBuilder mutant = new StringBuilder(chromosomeBits.length());
 
-		if(Config.debug)System.out.println("Unmodified: " + specimen.genoToPhenotype());
-		
+		if(Config.debug)System.out.println("Unmodified: " + specimen.chromo);
+
 		for(int i = 0; i < chromosomeBits.length(); i++){
 			int chance = rand.nextInt(Config.mutationChance);
 			char current = chromosomeBits.charAt(i);
 
 			mutant = mutant.append(current);
 
-			if (chance == 0){ //&& (current != space) ){
+			if (chance == 0){
 				mutated = true;
 				if(current == '1'){
 					mutant.setCharAt(i, '0');
@@ -41,25 +41,23 @@ public class ChromosomeOperations{
 	 * Choice further explained in accompanying report.
 	 *
 	 *
-	 * @param parent1 Individual type
-	 * @param parent2 Individual type
+	 * @param parent1 string of chromosome
+	 * @param parent2 string of chromosome
 	 * @return offspring, Individual type
 	 *
 	 * @see <a href="https://www.researchgate.net/publication/288749263_CROSSOVER_OPERATORS_IN_GENETIC_ALGORITHMS_A_REVIEW">Source</a>
 	 */
-	
-	public static Individual uniformCrossover(Individual Parent1, Individual Parent2){
-		String parent1 = Parent1.genoToPhenotype();
-		String parent2 = Parent2.genoToPhenotype();
+
+	public static Individual uniformCrossover(String parent1, String parent2){
 
 		int len = parent1.length();
 		int strength;
 
 		Individual offspring = new Individual();
-		
+
 		Random rand = new Random();
 		StringBuilder offspringChromosome = new StringBuilder( len );
-		
+
 		for( int i = 0; i < len; i++){
 			//could have been a simple coin toss as well as this is just an overcomplicated 50/50 decision
 			strength = rand.nextInt(len);
@@ -71,6 +69,7 @@ public class ChromosomeOperations{
 		}
 
 		offspring = mutation(offspring.stringIndividual(offspringChromosome.toString()));
+		offspring.setParents(parent1, parent2);
 		return (offspring);
 	}
 
@@ -83,29 +82,29 @@ public class ChromosomeOperations{
 	 *
 	 * @see <a href="https://www.researchgate.net/publication/288749263_CROSSOVER_OPERATORS_IN_GENETIC_ALGORITHMS_A_REVIEW">Source</a>
 	 */
-	public static Individual averageCrossover(Individual parent1, Individual parent2){
+	public static Individual averageCrossover(String parent1, String parent2){
 		Individual offspring = new Individual();
 
-		byte[] averageOfParents = new byte[parent1.genoToPhenotype().length()];
-		byte[] parent1Byte = parent1.genoToPhenotype().getBytes();
-		byte[] parent2Byte = parent2.genoToPhenotype().getBytes();
+		byte[] averageOfParents = new byte[parent1.length()];
+		byte[] parent1Byte = parent1.getBytes();
+		byte[] parent2Byte = parent2.getBytes();
 
 		for(int i = 0; i < averageOfParents.length; i++){
 			averageOfParents[i] = (byte) Math.round( (parent1Byte[i]+parent2Byte[i])/2	);
 		}
 		if(Config.debug)System.out.println(new String(averageOfParents));
 		offspring = mutation(offspring.stringIndividual(new String(averageOfParents)));
-
+		offspring.setParents(parent1, parent2);
 		return offspring;
 	}
 
 	/**
 	 * Takes a specimen, and changes it's gene codes to bits
-	 * @param specimen
-	 * @return string of chromosome
+	 * @param chromosome string of chromosome
+	 * @return string of nucleotids
 	 */
-	private static String chromosomeToBits(Individual specimen){
-		String chromosome = specimen.genoToPhenotype();
+	private static String chromosomeToBits(String chromosome){
+
 		String[] nucleotides = new String[chromosome.length()];			//array for the bits to be displayed
 
 		for(int i = 0; i < chromosome.length(); i++){
@@ -159,6 +158,6 @@ public class ChromosomeOperations{
 
 		specimen.setAlive(valid);
 
-		return specimen;	
+		return specimen;
 	}
 }

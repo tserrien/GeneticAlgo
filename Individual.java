@@ -1,17 +1,19 @@
 import java.util.Random;
+import java.text.DecimalFormat;
 
 public class Individual {
-	
+
 	private char[] alphabet = new char[27];
 	private int generation = 0;
 	private String parent1 = "";
 	private String parent2 = "";
 	private boolean isAlive = true;
+	public String chromo;
 
-	char[] chromosome;
-	double fitness;
-	double fitness2;
-	int maxDistance = 25;
+	private char[] chromosome;
+	private double fitness;
+	private double fitness2;
+	private int maxDistance = 25;
 
 	//empty constructor
 	public Individual(){
@@ -19,37 +21,45 @@ public class Individual {
 
 	//original constructor
 	public Individual(char[] chromosome) {
+		StringBuilder sb = new StringBuilder();
 		this.chromosome = chromosome;
+		this.chromo = sb.append(chromosome).toString();
 		this.fitness = 0;
 	}
-
+/*
 	//Original gTPt. Technically a toString method.
 	//Decided not to rename, as I plan to create a different toString
 	public String genoToPhenotype() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(chromosome);
 		return builder.toString();
-	}
+	}*/
 
 	//Mostly matches original
 	public Individual setIndividual(int len){
-	
+
 		char[] tempChromosome = new char[len];
-		
+
 		Random generator = new Random();				//the system time binded version caused uniform individuals for some weird reason
-		
+
 		for (char c = 'A'; c <= 'Z'; c++) {
 			alphabet[c - 'A'] = c;
 		}
 		alphabet[26] = ' ';
-		
+
 		for (int j = 0; j < len; j++){
 			tempChromosome[j] = alphabet[generator.nextInt(alphabet.length)]; //choose a random letter in the alphabet
 		}
+
+		StringBuilder sb = new StringBuilder(len);
+		sb.append(tempChromosome);
+		this.chromo = sb.toString();
+
 		return new Individual(tempChromosome);
 	}
-	
+
 	public Individual stringIndividual(String manual){
+		this.chromo = manual;
 		char[] painrelief = new char[manual.length()];
 		for(int i = 0; i < manual.length(); i++){
 			painrelief[i] = manual.charAt(i);
@@ -57,40 +67,37 @@ public class Individual {
 		return new Individual(painrelief);
 	}
 
-	//TODO refactor to be argumentless
-	public void setFitness(Individual specimen) {
-		String DNA = specimen.genoToPhenotype();
-		for(int i = 0; i<DNA.length(); i++){
+	public void setFitness() {
+		for(int i = 0; i<chromo.length(); i++){
 			byte a, b, space;
-			a = (byte)DNA.charAt(i);
+			a = (byte)chromo.charAt(i);
 			b = (byte)Config.TARGET.charAt(i);
 			space = (byte)' ';
 			if( (b!=' ' && a!=' ') || (a==' ' && b==' ')){
-			//if(Config.debug)System.out.println(DNA.charAt(i) + " " + a + " " + target.charAt(i) + " " + b);
-			int distance = Math.abs(a - b);
-			//if(Config.debug)System.out.println(distance);
-			fitness += distance;
+
+				int distance = Math.abs(a - b);
+
+				fitness += distance;
 			}else{
-			//if(Config.debug)System.out.println(DNA.charAt(i) + " " + a + " " + Config.TARGET.charAt(i) + " " + b);
-			int distance = Math.abs(a - b) - space;
-			//if(Config.debug)System.out.println(distance);
-			fitness += distance;	
+
+				int distance = Math.abs(a - b) - space;
+
+				fitness += distance;
 			}
 		}
 		fitness = 1 - fitness/(Config.TARGET.length()*maxDistance);
 		this.fitness = fitness;
 	}
 
-	public void setFitness2(Individual specimen) {
-		String DNA = specimen.genoToPhenotype();
+	public void setFitness2() {
 		boolean equals;
-		
-		for(int i = 0; i<DNA.length(); i++){
+
+		for(int i = 0; i<chromo.length(); i++){
 			byte a, b;
-			a = (byte)DNA.charAt(i);
+			a = (byte)chromo.charAt(i);
 			b = (byte)Config.TARGET.charAt(i);
 			equals = a==b;
-			//if(Config.debug)System.out.println(DNA.charAt(i) + " " + equals + " " + Config.TARGET.charAt(i));
+			//if(Config.debug)System.out.println(chromo.charAt(i) + " " + equals + " " + Config.TARGET.charAt(i));
 			if(equals) fitness2++;
 		}
 		fitness2 = fitness2/(Config.TARGET.length());
@@ -98,9 +105,14 @@ public class Individual {
 	}
 
 	public static String toString(Individual specimen){
-		StringBuilder sb = new StringBuilder();
+		if(specimen == null) return "null";
 
-		sb.append(specimen.genoToPhenotype());
+		StringBuilder sb = new StringBuilder();
+		DecimalFormat df = new DecimalFormat("#.####");
+
+		sb.append(specimen.chromo);
+		sb.append(", f: ");
+		sb.append(df.format(specimen.getFitness()));
 		sb.append(", Generation: ");
 		sb.append(specimen.generation);
 		sb.append(", Parent1: ");
@@ -110,10 +122,6 @@ public class Individual {
 
 		return sb.toString();
 	}
-	
-	public char[] getChromosome() {
-		return chromosome;
-	}
 
 	public void setChromosome(char[] chromosome) {
 		this.chromosome = chromosome;
@@ -122,7 +130,7 @@ public class Individual {
 	public double getFitness() {
 		return fitness;
 	}
-	
+
 	public double getFitness2() {
 		return fitness2;
 	}
@@ -135,9 +143,9 @@ public class Individual {
 		return generation;
 	}
 
-	public void setParents(Individual parent1, Individual parent2){
-		this.parent1 = parent1.genoToPhenotype();
-		this.parent2 = parent2.genoToPhenotype();
+	public void setParents(String parent1, String parent2){
+		this.parent1 = parent1;
+		this.parent2 = parent2;
 	}
 
 	public String getParent1(){
@@ -149,10 +157,10 @@ public class Individual {
 	}
 
 	public boolean getAlive(){
-	    return isAlive;
-    }
+		return isAlive;
+	}
 
-    public void setAlive(boolean alive){
-	    this.isAlive = alive;
-    }
+	public void setAlive(boolean alive){
+		this.isAlive = alive;
+	}
 }

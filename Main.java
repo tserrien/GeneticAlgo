@@ -23,6 +23,10 @@ public class Main {
 	 * @param args Control parameters for the program.
 	 */
 	public static void main(String[] args) {
+		long start = System.nanoTime();
+		long end;
+		long totalMem = Runtime.getRuntime().totalMemory();
+		long usedMem = 0;
 
 	    boolean success = false;
 		int popSize = 20;
@@ -46,9 +50,9 @@ public class Main {
 		for (int i = 0; i < popSize; i++){
 			population[i] = new Individual();
             population[i] = population[i].setIndividual(Config.TARGET.length());
-            population[i].setFitness(population[i]);		//fitness: euchlidean distance
-            //population[i].setFitness2(population[i]);		//fitness2: % of match compared to target
-            if(Config.debug)System.out.println(population[i].genoToPhenotype() + " f1: " + population[i].getFitness() + " f2: " + population[i].getFitness2());
+            population[i].setFitness();		//fitness: euchlidean distance
+            population[i].setFitness2();		//fitness2: % of match compared to target
+            if(Config.debug)System.out.println(population[i].chromo + " f1: " + population[i].getFitness() + " f2: " + population[i].getFitness2());
 		}
 		
 		if(Config.mutationChance < 1){
@@ -59,12 +63,14 @@ public class Main {
 		HeapSort.sort(population);
 		
 		for(int i = 0; i < population.length; i++){
-			if(Config.debug)System.out.println(population[i].genoToPhenotype() + " " + population[i].getFitness() + " " + population[i].getFitness2());
+			if(Config.debug)System.out.println(population[i].chromo + " " + population[i].getFitness() + " " + population[i].getFitness2());
 		}
 
 		Individual[] newPopulation = Selection.elitistSelection(population, 0);
 		HeapSort.sort(newPopulation);
-
+		usedMem = (int)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() )/1024/1024;
 		System.out.println(Individual.toString(newPopulation[0]));
+		end = System.nanoTime();
+		System.out.println("Runtime: " + (int)((end - start )/1000000) + " ms\nMemory usage approximation: " + usedMem + "MB");
 	}
 }

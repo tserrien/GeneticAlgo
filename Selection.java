@@ -1,68 +1,161 @@
-import java.util.Random;
-import java.math.BigInteger;
-
 public class Selection{
+
     public static Individual[] elitistSelection(Individual[] previousGeneration, int generationCount) {
 
         HeapSort.sort(previousGeneration);
-        //if(Config.debug)
-        System.out.println(Individual.toString(previousGeneration[0]));
+        if(Config.debug)
+            System.out.println(Individual.toString(previousGeneration[0]) + ", Gen: " + generationCount + ", members: " + previousGeneration.length);
         //base case of recursion. may be moved elsewhere
         if (previousGeneration[0].getFitness() == 1) return previousGeneration;
 
-        //if basecase fails
-        double minFitness = previousGeneration[0].getFitness() * Config.elitePercent;
+        //if basecase fails, work begans
+        double minFitness = previousGeneration[0].getFitness() * (1 - Config.elitePercent);
 
         int breederCount = 0;
-        for (int i = 0; i < previousGeneration.length; i++) {
-            if (previousGeneration[i].getFitness() > minFitness) {
-                breederCount++;
-            } else {
-                previousGeneration[i] = null;
-            }
-
-        }
-
-        int childrenSerial = 0;
-        int livingOffspring = 0;
-        Individual[] offsprings = new Individual[breederCount * (breederCount - 1) * Config.children];
-
-        for (int i = 0; i < offsprings.length; i++) offsprings[i] = new Individual();
-
-        for (int i = 0; i < breederCount; i++) {
-            for (int j = i + 1; j < breederCount; j++) {
-                for (int k = 0; k < Config.children; k++) {
-                    offsprings[childrenSerial] = ChromosomeOperations.uniformCrossover(previousGeneration[i], previousGeneration[j]);
-
-                    if (offsprings[childrenSerial].getAlive()) {
-                        offsprings[childrenSerial].setFitness(offsprings[childrenSerial]);
-                        offsprings[childrenSerial].setParents(previousGeneration[i], previousGeneration[j]);
-                        offsprings[childrenSerial].setGeneration(generationCount + 1);
-                        livingOffspring++;
-
-                        //if(Config.debug)
-                        System.out.println(Individual.toString(offsprings[childrenSerial]) + " cS:" + childrenSerial);
-                        childrenSerial++;
-                    } else {
-                        offsprings[childrenSerial] = null;
+        for(int i = 0; i < previousGeneration.length; i++) {
+            //System.out.println(previousGeneration[i].chromo);
+            if(previousGeneration[i].getFitness() > minFitness){
+                for (int j = i + 1; j < previousGeneration.length; j++) {
+                    //eliminate duplicates, keep first entry
+                    if (previousGeneration[j] != null && previousGeneration[j].getFitness() > minFitness &&
+                            previousGeneration[i].chromo.compareTo(
+                                    previousGeneration[j].chromo) == 0) {
+                        previousGeneration[j].setAlive(false);
                     }
                 }
             }
         }
 
-        HeapSort.sort(offsprings);
-
-        Individual[] currentGeneration = new Individual[previousGeneration.length + livingOffspring];
-
         for (int i = 0; i < previousGeneration.length; i++) {
-            currentGeneration[i] = previousGeneration[i];
+            if ( previousGeneration[i].getAlive() && previousGeneration[i].getFitness() > minFitness && (generationCount - previousGeneration[i].getGeneration()) < Config.lifeTime) {
+                breederCount++;
+            }else {
+                //kiss of death
+                previousGeneration[i].setAlive(false);
+            }
         }
-        for (int i = 0; i < livingOffspring; i++) {
-            currentGeneration[previousGeneration.length + i] = offsprings[i];
+        if(breederCount < 2 ) {
+            breederCount = 2;
+            for (int i = breederCount; i < previousGeneration.length; i++) previousGeneration[i] = null;
+        }else{
+            for(int i = 0; i < previousGeneration.length; i++)
+                if(!previousGeneration[i].getAlive()) previousGeneration[i] = null;
+        }
+
+        Individual[] notNullOld = new Individual[breederCount];
+        int step = 0;
+        for(int i = 0; i < previousGeneration.length; i++){
+            if(previousGeneration[i] != null) {
+                notNullOld[step] = previousGeneration[i];
+                step++;
+            }
+        }
+
+        if(Config.debug) {
+            System.out.println(breederCount + " parent out of " + previousGeneration.length + " individuals " + minFitness);
+            System.out.println("Not nulls: " + notNullOld.length);
+            for(int i = 0; i < notNullOld.length; i++) System.out.println(Individual.toString(notNullOld[i]));
+            System.out.println();
+        }
+
+        int childrenSerial = 0;
+        int livingOffspring = 0;
+        int stillborn = 0;
+        int arraySize = 0;
+
+        if (notNullOld.length > Config.partners) {
+            arraySize = (int) ((notNullOld.length - Config.partners) * Config.partners + Config.partners * (Config.partners - 1) / 2) * Config.children;
+        }else{
+            arraySize = (int) ((notNullOld.length * (notNullOld.length - 1 )) / 2) * Config.children;
+        }
+
+        if(Config.debug) System.out.println( notNullOld.length + " " + arraySize);
+
+        Individual[] offsprings = new Individual[arraySize];
+        for (int i = 0; i < offsprings.length; i++) offsprings[i] = new Individual();
+
+        for(int i = 0; i < notNullOld.length; i++) {
+            int limit = 0;
+
+            if (i + Config.partners < notNullOld.length) {
+                limit = i + Config.partners + 1;
+            } else {
+                limit = notNullOld.length;
+            }
+            if(Config.debug)System.out.println("i: " + i + " limit: " + limit + " length: " + notNullOld.length);
+
+            for (int j = i + 1; j < limit; j++){
+                if(Config.debug)System.out.println("i: " + i + " j: " + j);
+                for(int k = 0; k < Config.children; k++) {
+                    offsprings[childrenSerial] = ChromosomeOperations.uniformCrossover(notNullOld[i].chromo, notNullOld[j].chromo);
+
+                    if(offsprings[childrenSerial].getAlive()) offsprings[childrenSerial].setFitness();
+
+                    if(offsprings[childrenSerial].getAlive() && offsprings[childrenSerial].getFitness() > minFitness){
+                        livingOffspring++;
+
+                        offsprings[childrenSerial].setGeneration(generationCount + 1);
+                        if(Config.debug)
+                            System.out.println(Individual.toString(offsprings[childrenSerial]) + ", cS: " + childrenSerial + " of " + offsprings.length);
+                    }else{
+                        stillborn++;
+                        offsprings[childrenSerial].setAlive(false);
+                        offsprings[childrenSerial] = null;
+                    }
+                    childrenSerial++;
+                }
+            }
+        }
+
+        /*if(stillborn + livingOffspring == offsprings.length) {
+            System.out.println("Looking good");
+            System.exit(0);
+        }else {
+            System.out.println("\nMath doesn't check out");
+            System.out.println(stillborn + " dead, " + livingOffspring + " alive, sum: " + (livingOffspring + stillborn)+ ". expected: " + offsprings.length);
+            System.exit(0);
+        }*/
+
+        Individual[] currentGeneration = new Individual[notNullOld.length + livingOffspring];
+        for(int i = 0; i < currentGeneration.length; i++)currentGeneration[i] = new Individual();
+
+        for (int i = 0; i < notNullOld.length; i++) {
+            currentGeneration[i] = notNullOld[i];
+        }
+        for(int i = 0; i < notNullOld.length; i++){
+            if(currentGeneration[i] == null){
+                System.out.println("Shits's on fayah yo! " + i);
+                System.exit(0);
+            }
+        }
+
+        step = 0; //reset
+        for(int i = 0; i < offsprings.length; i++){
+            if(offsprings[i] != null){
+                currentGeneration[(notNullOld.length - 1) + step ] = offsprings[i];
+                if(Config.debug) System.out.println("Step " + step + " of " + offsprings.length + " Position " + i + " of " + currentGeneration.length);
+                step++;
+            }
+        }
+
+        if(Config.debug){
+            System.out.println("Current generation: " + currentGeneration.length);
+            System.out.println((notNullOld.length));
+            System.out.println(Individual.toString(notNullOld[notNullOld.length - 1 ]));
+            System.out.println(Individual.toString(currentGeneration[currentGeneration.length - 1 ]));
+            }
+        for(int i = 0; i < currentGeneration.length; i++){
+            if(currentGeneration[i] == null) {
+                System.out.println("Shits's really on fayah yo! " + i);
+                System.exit(0);
+            }
         }
         previousGeneration = null;
-        System.gc();
-        System.gc();
+        notNullOld = null;
+
+        //System.gc();
+        //System.gc();
+        if(generationCount % 5 == 0) Config.setElitePercent(Config.elitePercent / 2);
 
         return elitistSelection(currentGeneration, (generationCount + 1));
     }
