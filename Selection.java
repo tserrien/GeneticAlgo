@@ -22,12 +22,7 @@ public class Selection{
                 for (int j = i + 1; j < previousGeneration.length; j++) {
                     //eliminate duplicates, keep first entry
                     if (previousGeneration[j] != null && previousGeneration[j].getFitness() > minFitness && previousGeneration[i].chromo.compareTo(previousGeneration[j].chromo) == 0) previousGeneration[j].setAlive(false);
-                }/*
-                if (previousGeneration[i].getAlive() && (generationCount - previousGeneration[i].getGeneration()) < Config.lifeTime){
-                    breederCount++;
-                }else{
-                    previousGeneration[i].setAlive(false);
-                }*/
+                }
             }
         }
 
@@ -131,7 +126,7 @@ public class Selection{
         }
         for(int i = 0; i < notNullOld.length; i++){
             if(currentGeneration[i] == null){
-                System.out.println("Shits's on fayah yo! " + i);
+                System.out.println("Error. Null entries copied to current generation." + i);
                 System.exit(0);
             }
         }
@@ -153,7 +148,7 @@ public class Selection{
             }
         for(int i = 0; i < currentGeneration.length; i++){
             if(currentGeneration[i] == null) {
-                System.out.println("Shits's really on fayah yo! " + i);
+                System.out.println("Error. Null entries copied to current generation." + i);
                 System.exit(0);
             }
         }
@@ -162,10 +157,9 @@ public class Selection{
 
         //every 3 generations garbage collection is forced
         if(generationCount > 1 && generationCount % 3 == 0) {
-            System.out.println("Buckle up, GC time!");
             System.gc();
             System.gc();
-            //Config.setElitePercent(Config.elitePercent / 2); //really don't want to do this :(
+            Config.setElitePercent(Config.elitePercent / 2);
         }
 
         end = System.nanoTime();

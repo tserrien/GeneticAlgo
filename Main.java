@@ -73,7 +73,7 @@ public class Main {
 		end = System.nanoTime();
 		long runtime = end - start;
 		String time = "ms";
-		runtime = (long) (runtime / 10000000);
+		runtime = (long) (runtime / 1000000);
 		if(runtime > 1000){
 			runtime = (long)(runtime / 1000);
 			time = "s";
