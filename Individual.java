@@ -119,6 +119,8 @@ public class Individual {
 		sb.append(specimen.parent1);
 		sb.append(", Parent2: ");
 		sb.append(specimen.parent2);
+		sb.append(", Is alive: ");
+		sb.append(specimen.getAlive());
 
 		return sb.toString();
 	}

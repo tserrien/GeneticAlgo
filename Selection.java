@@ -1,10 +1,10 @@
 public class Selection{
+    public Selection(){}
 
-    public static Individual[] elitistSelection(Individual[] previousGeneration, int generationCount) {
+    public Individual[] elitistSelection(Individual[] previousGeneration, int generationCount) {
         long start = System.nanoTime();
         long end = 0;
 
-        HeapSort.sort(previousGeneration);
         //if(Config.debug)
             System.out.println(Individual.toString(previousGeneration[0]) + ", Gen: " + generationCount + ", members: " + previousGeneration.length);
 
@@ -22,12 +22,7 @@ public class Selection{
                 for (int j = i + 1; j < previousGeneration.length; j++) {
                     //eliminate duplicates, keep first entry
                     if (previousGeneration[j] != null && previousGeneration[j].getFitness() > minFitness && previousGeneration[i].chromo.compareTo(previousGeneration[j].chromo) == 0) previousGeneration[j].setAlive(false);
-                }/*
-                if (previousGeneration[i].getAlive() && (generationCount - previousGeneration[i].getGeneration()) < Config.lifeTime){
-                    breederCount++;
-                }else{
-                    previousGeneration[i].setAlive(false);
-                }*/
+                }
             }
         }
 
@@ -114,14 +109,16 @@ public class Selection{
             }
         }
 
-        /*if(stillborn + livingOffspring == offsprings.length) {
-            System.out.println("Looking good");
-            System.exit(0);
-        }else {
-            System.out.println("\nMath doesn't check out");
-            System.out.println(stillborn + " dead, " + livingOffspring + " alive, sum: " + (livingOffspring + stillborn)+ ". expected: " + offsprings.length);
-            System.exit(0);
-        }*/
+        if(Config.debug) {
+            if (stillborn + livingOffspring == offsprings.length) {
+                System.out.println("Looking good");
+                System.exit(0);
+            } else {
+                System.out.println("\nMath doesn't check out");
+                System.out.println(stillborn + " dead, " + livingOffspring + " alive, sum: " + (livingOffspring + stillborn) + ". expected: " + offsprings.length);
+                System.exit(0);
+            }
+        }
 
         Individual[] currentGeneration = new Individual[notNullOld.length + livingOffspring];
         for(int i = 0; i < currentGeneration.length; i++)currentGeneration[i] = new Individual();
@@ -165,7 +162,10 @@ public class Selection{
             System.out.println("Buckle up, GC time!");
             System.gc();
             System.gc();
-            //Config.setElitePercent(Config.elitePercent / 2); //really don't want to do this :(
+        }
+
+        if(generationCount > 1 && generationCount % 4 == 0) {
+            Config.setElitePercent(Config.elitePercent / 2);
         }
 
         end = System.nanoTime();

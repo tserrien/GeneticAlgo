@@ -16,10 +16,14 @@
 import java.util.Random;
 
 public class Main {
-
-	static char[] alphabet = new char[27];
-
 	/**
+	 * Order of control parameters:
+	 * Starter population size (int)
+	 * Mutation rate (double)
+	 * Number of offsprings per pair of parents (int)
+	 * Lifeitme of individuals in generations (int)
+	 * Debug constraint (NOT recommended to set to true) (true/false)
+	 *
 	 * @param args Control parameters for the program.
 	 */
 	public static void main(String[] args) {
@@ -28,15 +32,15 @@ public class Main {
 		long totalMem = Runtime.getRuntime().totalMemory();
 		long usedMem = 0;
 
-	    boolean success = false;
 		int popSize = 20;
-		double goal = 0;
 		char[] tempChromosome = new char[Config.TARGET.length()];
 		
 		try{
 			popSize = Integer.parseInt(args[0]);
 			Config.setMutationChance(Integer.parseInt(args[1]));
-			Config.setDebug(Boolean.parseBoolean(args[2]));
+			Config.setChildren(Integer.parseInt(args[2]));
+			Config.setLifeTime(Integer.parseInt(args[3]));
+			Config.setDebug(Boolean.parseBoolean(args[4]));
 		}catch(Exception e){
 			System.out.println("Input error. Default values used for simulation.");
 		}
@@ -60,13 +64,15 @@ public class Main {
 			System.out.println("Invalid mutation factor. Factor reset to: " + Config.mutationChance);
 		}
 
-		HeapSort.sort(population);
-		
+		HeapSort.tunedSort(population);
+
 		for(int i = 0; i < population.length; i++){
 			if(Config.debug)System.out.println(population[i].chromo + " " + population[i].getFitness() + " " + population[i].getFitness2());
 		}
 
-		Individual[] newPopulation = Selection.elitistSelection(population, 0);
+		Selection selection = new Selection();
+		Individual[] newPopulation = selection.elitistSelection(population, 0);
+
 		HeapSort.sort(newPopulation);
 		usedMem = (int)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() )/1024/1024;
 		System.out.println(Individual.toString(newPopulation[0]));
