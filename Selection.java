@@ -1,5 +1,17 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Collections;
+
 public class Selection{
 
+    /** Recursive, array based volatile implementation of elitist selection.
+     *
+     * @param previousGeneration
+     * @param generationCount
+     * @return Array of Individuals, unsorted
+     */
     public static Individual[] elitistSelection(Individual[] previousGeneration, int generationCount) {
         long start = System.nanoTime();
         long end = 0;
@@ -172,5 +184,99 @@ public class Selection{
         }
         System.out.println("Runtime: " + runtime + " " + time);
         return elitistSelection(currentGeneration, (generationCount + 1));
+    }
+
+    /** Arraylist based version of elitist selection.
+     *
+     * @param starterGeneration
+     * @return first individual to succeed in reaching the target
+     */
+
+    public static Individual elitistSelection(Individual[] starterGeneration){
+        long start = 0;
+        long end = 0;
+        long totalMem = Runtime.getRuntime().totalMemory();
+        long usedMem = 0;
+        Individual offspring = new Individual();
+        int generation = 0;
+
+        ArrayList<Individual> population = new ArrayList<Individual>();
+
+        for(int i = 0; i < starterGeneration.length; i++){
+            population.add(starterGeneration[i]);
+        }
+        Collections.sort(population);
+
+        while(population.get(0).getFitness() != 1){
+            start = System.nanoTime();
+            System.out.println(population.get(0).toString() + " Gen: " + generation );
+            generation++;
+            //Take out unfit individuals
+            //2 is always kept to prevent collapse of population
+            double minFitness = population.get(0).getFitness() * (1 - Config.elitePercent);
+            for(int i = 0; i < population.size(); i++){
+                if(population.get(i).getFitness() < minFitness || (population.get(i).getGeneration() + Config.lifeTime) < generation) {
+                    population.remove(i);
+                    i--;
+                }
+            }
+
+            if(generation % 2 == 0)
+            for(int i = 0; i < population.size(); i++){
+                int j = i + 1;
+                //matching genes have equal fitness, no need to go though all of the individuals
+                while(j < population.size() && population.get(i).getFitness() == population.get(j).getFitness()){
+                    if (population.get(i).chromo.compareTo(population.get(j).chromo) == 0) {
+                        if (population.get(i).getGeneration() > population.get(j).getGeneration()) {
+                            population.remove(j);
+                        } else {
+                            population.remove(i);
+                        }
+                    }
+                    j++;
+                }
+            }
+
+            int alive = population.size();
+
+            for(int i = 0; i < alive; i++){
+                int limit = 0;
+                if((i + Config.partners) < alive){
+                    limit = i + Config.partners + 1;
+                }else{
+                    limit = alive;
+                }
+
+                for(int j = i + 1; j < limit; j++ ){
+                    //System.out.println("Parents " + i + " of " + alive + " and " + j + " of " + limit);
+                    for(int k = 0; k < Config.children; k++){
+                        offspring = ChromosomeOperations.uniformCrossover(population.get(i).chromo, population.get(j).chromo);
+                        if(offspring.getAlive()) offspring.setFitness();
+                        if(offspring.getFitness() > minFitness){
+                            offspring.setGeneration(generation);
+                            population.add(offspring);
+                            //System.out.println(offspring.toString());
+                        }
+                    }
+                }
+            }
+
+            Collections.sort(population);
+            end = System.nanoTime() - start;
+            String time = "ms";
+            end = (long) (end / 1000000);
+            if(end > 1000){
+                end = (long)(end / 1000);
+                time = "s";
+            }
+            usedMem = (int)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() )/1024/1024;
+            System.out.println("Runtime: " + end + time + ", Mem: " + usedMem + " MB, Gen " + generation + " Pop " + population.size());
+            /*if(generation % 3 == 0) {
+                Config.setElitePercent(Config.elitePercent / 2);
+            }*/
+
+        }
+
+        return population.get(0);
     }
 }

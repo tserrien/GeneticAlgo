@@ -29,7 +29,7 @@ public class Main {
 		long usedMem = 0;
 
 	    boolean success = false;
-		int popSize = 20;
+		int popSize = 5;
 		double goal = 0;
 		char[] tempChromosome = new char[Config.TARGET.length()];
 		
@@ -52,7 +52,6 @@ public class Main {
             population[i] = population[i].setIndividual(Config.TARGET.length());
             population[i].setFitness();		//fitness: euchlidean distance
             population[i].setFitness2();		//fitness2: % of match compared to target
-            if(Config.debug)System.out.println(population[i].chromo + " f1: " + population[i].getFitness() + " f2: " + population[i].getFitness2());
 		}
 		
 		if(Config.mutationChance < 1){
@@ -61,15 +60,20 @@ public class Main {
 		}
 
 		HeapSort.sort(population);
-		
-		for(int i = 0; i < population.length; i++){
-			if(Config.debug)System.out.println(population[i].chromo + " " + population[i].getFitness() + " " + population[i].getFitness2());
-		}
 
-		Individual[] newPopulation = Selection.elitistSelection(population, 0);
-		HeapSort.sort(newPopulation);
+		if(Config.debug)
+		    for(int i = 0; i < population.length; i++){
+			    System.out.println(population[i].chromo + " " + population[i].getFitness() + " " + population[i].getFitness2());
+		    }
+
+		//Individual[] newPopulation = Selection.elitistSelection(population, 0);
+        //HeapSort.sort(newPopulation);
+        Individual winner = Selection.elitistSelection(population);
 		usedMem = (int)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() )/1024/1024;
-		System.out.println(Individual.toString(newPopulation[0]));
+		//System.out.println(Individual.toString(newPopulation[0]));
+        System.out.println("\n" + winner.toString());
+
+        //TODO create a util method for benchmark metrics
 		end = System.nanoTime();
 		long runtime = end - start;
 		String time = "ms";
