@@ -1,7 +1,7 @@
 import java.util.Random;
 import java.text.DecimalFormat;
 
-public class Individual {
+public class Individual implements Comparable<Individual>{
 
 	private char[] alphabet = new char[27];
 	private int generation = 0;
@@ -34,6 +34,11 @@ public class Individual {
 		builder.append(chromosome);
 		return builder.toString();
 	}*/
+
+	//@Override
+	public int compareTo(Individual other){
+		return (this.getFitness() > other.getFitness()) ? -1 : (this.getFitness() == other.getFitness()) ? 0 : 1;
+	}
 
 	//Mostly matches original
 	public Individual setIndividual(int len){
@@ -102,6 +107,10 @@ public class Individual {
 		}
 		fitness2 = fitness2/(Config.TARGET.length());
 		this.fitness2 = fitness2;
+	}
+
+	@Override public String toString(){
+		return this.chromo + ", " + " f: " + this.getFitness() + ", gen: " + this.generation + ", p1: " + this.parent1 + ", p2: " + this.parent2;
 	}
 
 	public static String toString(Individual specimen){

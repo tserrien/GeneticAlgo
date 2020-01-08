@@ -32,7 +32,9 @@ public class Main {
 		long totalMem = Runtime.getRuntime().totalMemory();
 		long usedMem = 0;
 
-		int popSize = 20;
+	    boolean success = false;
+		int popSize = 5;
+		double goal = 0;
 		char[] tempChromosome = new char[Config.TARGET.length()];
 		
 		try{
@@ -56,7 +58,6 @@ public class Main {
             population[i] = population[i].setIndividual(Config.TARGET.length());
             population[i].setFitness();		//fitness: euchlidean distance
             population[i].setFitness2();		//fitness2: % of match compared to target
-            if(Config.debug)System.out.println(population[i].chromo + " f1: " + population[i].getFitness() + " f2: " + population[i].getFitness2());
 		}
 		
 		if(Config.mutationChance < 1){
@@ -64,22 +65,25 @@ public class Main {
 			System.out.println("Invalid mutation factor. Factor reset to: " + Config.mutationChance);
 		}
 
-		HeapSort.tunedSort(population);
+		HeapSort.sort(population);
 
-		for(int i = 0; i < population.length; i++){
-			if(Config.debug)System.out.println(population[i].chromo + " " + population[i].getFitness() + " " + population[i].getFitness2());
-		}
+		if(Config.debug)
+		    for(int i = 0; i < population.length; i++){
+			    System.out.println(population[i].chromo + " " + population[i].getFitness() + " " + population[i].getFitness2());
+		    }
 
-		Selection selection = new Selection();
-		Individual[] newPopulation = selection.elitistSelection(population, 0);
-
-		HeapSort.sort(newPopulation);
+		//Individual[] newPopulation = Selection.elitistSelection(population, 0);
+        //HeapSort.sort(newPopulation);
+        Individual winner = Selection.elitistSelection(population);
 		usedMem = (int)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() )/1024/1024;
-		System.out.println(Individual.toString(newPopulation[0]));
+		//System.out.println(Individual.toString(newPopulation[0]));
+        System.out.println("\n" + winner.toString());
+
+        //TODO create a util method for benchmark metrics
 		end = System.nanoTime();
 		long runtime = end - start;
 		String time = "ms";
-		runtime = (long) (runtime / 10000000);
+		runtime = (long) (runtime / 1000000);
 		if(runtime > 1000){
 			runtime = (long)(runtime / 1000);
 			time = "s";
