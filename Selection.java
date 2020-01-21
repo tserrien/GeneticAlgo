@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.Collections;
 
 public class Selection{
-    public Selection(){}
 
     /** Recursive, array based volatile implementation of elitist selection.
      *
@@ -101,7 +100,7 @@ public class Selection{
             for (int j = i + 1; j < limit; j++){
                 if(Config.debug)System.out.println("i: " + i + " j: " + j);
                 for(int k = 0; k < Config.children; k++) {
-                    offsprings[childrenSerial] = ChromosomeOperations.uniformCrossover(notNullOld[i].chromo, notNullOld[j].chromo);
+                    offsprings[childrenSerial] = Crossover.Uniform(notNullOld[i].chromo, notNullOld[j].chromo);
 
                     if(offsprings[childrenSerial].getAlive()) offsprings[childrenSerial].setFitness();
 
@@ -199,10 +198,8 @@ public class Selection{
      */
 
     public static Individual elitistSelection(Individual[] starterGeneration){
-        long start = 0;
-        long end = 0;
-        long totalMem = Runtime.getRuntime().totalMemory();
-        long usedMem = 0;
+        Benchmark benchmark = new Benchmark();
+        benchmark.Start();
         Individual offspring = new Individual();
         int generation = 0;
 
@@ -214,11 +211,9 @@ public class Selection{
         Collections.sort(population);
 
         while(population.get(0).getFitness() != 1){
-            start = System.nanoTime();
             System.out.println(population.get(0).toString() + " Gen: " + generation );
             generation++;
             //Take out unfit individuals
-            //2 is always kept to prevent collapse of population
             double minFitness = population.get(0).getFitness() * (1 - Config.elitePercent);
             for(int i = 0; i < population.size(); i++){
                 if(population.get(i).getFitness() < minFitness || (population.get(i).getGeneration() + Config.lifeTime) < generation) {
@@ -231,13 +226,11 @@ public class Selection{
             for(int i = 0; i < population.size(); i++){
                 int j = i + 1;
                 //matching genes have equal fitness, no need to go though all of the individuals
-                while(j < population.size() && population.get(i).getFitness() == population.get(j).getFitness()){
-                    if (population.get(i).chromo.compareTo(population.get(j).chromo) == 0) {
-                        if (population.get(i).getGeneration() > population.get(j).getGeneration()) {
-                            population.remove(j);
-                        } else {
-                            population.remove(i);
-                        }
+                while(j < population.size() && population.get(i).getFitness() == population.get(j).getFitness() && population.get(i).chromo.compareTo(population.get(j).chromo) == 0){
+                    if (population.get(i).getGeneration() > population.get(j).getGeneration()) {
+                        population.remove(j);
+                    } else {
+                        population.remove(i);
                     }
                     j++;
                 }
@@ -245,6 +238,8 @@ public class Selection{
 
             int alive = population.size();
 
+            //solution to break out of this giant loop found at https://stackoverflow.com/a/886979
+            outerloop:
             for(int i = 0; i < alive; i++){
                 int limit = 0;
                 if((i + Config.partners) < alive){
@@ -256,30 +251,27 @@ public class Selection{
                 for(int j = i + 1; j < limit; j++ ){
                     //System.out.println("Parents " + i + " of " + alive + " and " + j + " of " + limit);
                     for(int k = 0; k < Config.children; k++){
-                        offspring = ChromosomeOperations.uniformCrossover(population.get(i).chromo, population.get(j).chromo);
+                        offspring = Crossover.Uniform(population.get(i).chromo, population.get(j).chromo);
                         if(offspring.getAlive()) offspring.setFitness();
                         if(offspring.getFitness() > minFitness){
                             offspring.setGeneration(generation);
                             population.add(offspring);
-                            //System.out.println(offspring.toString());
+                            if(offspring.getFitness() == 1){
+                                //as only one successful offspring is sufficient, the loops are broken
+                                break outerloop;
+                            }
                         }
                     }
                 }
             }
 
             Collections.sort(population);
-            end = System.nanoTime() - start;
-            String time = "ms";
-            end = (long) (end / 1000000);
-            if(end > 1000){
-                end = (long)(end / 1000);
-                time = "s";
-            }
-            usedMem = (int)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() )/1024/1024;
-            System.out.println("Runtime: " + end + time + ", Mem: " + usedMem + " MB, Gen " + generation + " Pop " + population.size());
-            /*if(generation % 3 == 0) {
+            benchmark.End();
+            System.out.println(benchmark.PrintResult());
+            System.out.println("Gen " + generation + " Pop " + population.size());
+            if(Config.increasingElitism && generation % Config.elitismRate == 0) {
                 Config.setElitePercent(Config.elitePercent / 2);
-            }*/
+            }
 
         }
 
